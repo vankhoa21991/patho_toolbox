@@ -9,8 +9,8 @@ import cv2
 import os
 from tqdm.notebook import tqdm
 import zipfile
-from patho2.patho.utils.path import path_cfg,img_proc_cfg
-from patho2.patho.utils.utils import enc2mask
+from patho.cfg.config import path_cfg,img_proc_cfg
+from patho.utils.utils import enc2mask
 
 def plot_zip(OUT_TRAIN, OUT_MASKS):
     columns, rows = 4, 4

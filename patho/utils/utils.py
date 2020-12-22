@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import tensorflow as tf
 from tqdm import tqdm
 
 def enc2mask(encs, shape):
@@ -72,3 +73,4 @@ def read_data(image_paths, mask_paths, gloms_only=False):
     print('images shape:', images.shape)
     print('masks shape:', masks.shape)
     return images, masks
+
