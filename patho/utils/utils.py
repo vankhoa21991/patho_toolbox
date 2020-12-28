@@ -1,7 +1,19 @@
 import numpy as np
 import cv2
 import tensorflow as tf
+import matplotlib.pyplot as plt
+import torch
+import random
+import os
 from tqdm import tqdm
+
+def set_all_seeds(seed):
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
 
 def enc2mask(encs, shape):
     '''
@@ -74,3 +86,44 @@ def read_data(image_paths, mask_paths, gloms_only=False):
     print('masks shape:', masks.shape)
     return images, masks
 
+
+def rle_encode_less_memory(img):
+    pixels = img.T.flatten()
+    pixels[0] = 0
+    pixels[-1] = 0
+    runs = np.where(pixels[1:] != pixels[:-1])[0] + 2
+    runs[1::2] -= runs[::2]
+    return ' '.join(str(x) for x in runs)
+
+
+def make_grid(shape, window=256, min_overlap=32):
+    """
+        Return Array of size (N,4), where N - number of tiles,
+        2nd axis represente slices: x1,x2,y1,y2
+    """
+    x, y = shape
+    nx = x // (window - min_overlap) + 1
+    x1 = np.linspace(0, x, num=nx, endpoint=False, dtype=np.int64)
+    x1[-1] = x - window
+    x2 = (x1 + window).clip(0, x)
+    ny = y // (window - min_overlap) + 1
+    y1 = np.linspace(0, y, num=ny, endpoint=False, dtype=np.int64)
+    y1[-1] = y - window
+    y2 = (y1 + window).clip(0, y)
+    slices = np.zeros((nx, ny, 4), dtype=np.int64)
+
+    for i in range(nx):
+        for j in range(ny):
+            slices[i, j] = x1[i], x2[i], y1[j], y2[j]
+    return slices.reshape(nx * ny, 4)
+
+def check_lr(DEMO_EPOCHS, demo_optim, demo_sched):
+    lrs = []
+
+    for i in range(DEMO_EPOCHS):
+        demo_optim.step()
+        lrs.append(demo_optim.param_groups[0]["lr"])
+        demo_sched.step()
+
+    plt.plot(lrs)
+    plt.show()

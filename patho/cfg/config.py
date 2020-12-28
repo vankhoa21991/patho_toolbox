@@ -5,6 +5,11 @@ class img_proc_cfg():
         self.sz = 512  # the size of tiles
         self.reduce = 4  # reduce the original images by 4 times
 
+        self.THRESHOLD = 0.4
+        self.WINDOW = 1024
+        self.MIN_OVERLAP = 300
+
+
 
 class path_cfg():
     def __init__(self):
